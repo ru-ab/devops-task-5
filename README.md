@@ -21,33 +21,43 @@ sudo apt-get update
 sudo apt-get install helm
 ```
 
-2. Add ENV variable KUBECONFIG for the helm util:
-
-```bash
-export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-```
-
-## Create Wordpress Chart
-
-1. Add Bitnami repo
+2. Add Bitnami repo
 
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
 ```
 
-2. Download the wordpress chart from Bitnami:
+3. Add ENV variable KUBECONFIG for the helm util:
 
 ```bash
-helm pull bitnami/wordpress
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 ```
 
-3. Extract files from the downloaded archive:
+## Prepare To  Install Wordpress
+
+1. Clone this repository:
 
 ```bash
-tar -xvf wordpress-x.x.x.tgz
+git clone https://github.com/ru-ab/devops-task-5.git
 ```
 
-4. Modify `wordpressUsername` and `wordpressPassword` values in the **values.yaml** file.
+2. Install dependencies:
+
+```bash
+helm dependency build wordpress
+```
+
+3. Modify environment variables in `values.yaml` file if needed:
+
+- Wordpress
+  - wordpressUsername
+  - wordpressPassword
+  - wordpressEmail
+- MySQL
+  - rootPassword 
+  - username
+  - password
+  - database
 
 ## Deploy Wordpress Chart
 
