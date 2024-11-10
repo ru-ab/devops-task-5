@@ -15,10 +15,15 @@ jobs:
         run: |
           echo ${{ secrets.KUBECONFIG }} | base64 -d > /tmp/config
 
+      - name: Build dependencies
+        run: |
+          helm dependency build
+        env:
+          KUBECONFIG: /tmp/config  
+
       - name: Deploy Wordpress
         run: |
           helm install wordpress ./wordpress
-
         env:
           KUBECONFIG: /tmp/config
 
