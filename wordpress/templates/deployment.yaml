@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "wordpress.fullname" . }}
+spec:
+  replicas: {{ .Values.wordpress.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "wordpress.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "wordpress.fullname" . }}
+    spec:
+      containers:
+        - name: wordpress
+          image: "{{ .Values.wordpress.image.repository }}:{{ .Values.wordpress.image.tag }}"
+          env:
+            - name: WORDPRESS_DATABASE_HOST
+              value: {{ include "wordpress.mysqlFullName" . }}
+            - name: WORDPRESS_DATABASE_NAME
+              value: {{ .Values.mysql.auth.database }}
+            - name: WORDPRESS_DATABASE_USER
+              value: {{ .Values.mysql.auth.username }}
+            - name: WORDPRESS_DATABASE_PASSWORD
+              value: {{ .Values.mysql.auth.password }}
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: wordpress-data
+              mountPath: /bitnami/wordpress
+      volumes:
+        - name: wordpress-data
+          persistentVolumeClaim:
+            claimName: {{ include "wordpress.fullname" . }}-data
+            

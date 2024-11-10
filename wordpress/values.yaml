@@ -1,0 +1,30 @@
+wordpress:
+  image:
+    repository: bitnami/wordpress
+    pullPolicy: IfNotPresent
+    tag: latest
+  replicaCount: 1
+  service:
+    type: LoadBalancer
+    port: 80
+  ingress:
+    enabled: false
+  wordpressUsername: admin
+  wordpressPassword: pass
+  wordpressEmail: admin@example.com
+
+mysql:
+  enabled: true
+  auth:
+    rootPassword: pass
+    username: wp
+    password: wp_pass
+    database: wp_db
+  primary:
+    service:
+      type: ClusterIP
+  volumePermissions:
+    enabled: true
+  persistence:
+    enabled: true
+    size: 6Gi
