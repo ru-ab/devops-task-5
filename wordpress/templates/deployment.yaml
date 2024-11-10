@@ -2,67 +2,35 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "wordpress.fullname" . }}
-  labels:
-    {{- include "wordpress.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  replicas: {{ .Values.wordpress.replicaCount }}
   selector:
     matchLabels:
-      {{- include "wordpress.selectorLabels" . | nindent 6 }}
+      app: {{ include "wordpress.fullname" . }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "wordpress.labels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        app: {{ include "wordpress.fullname" . }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "wordpress.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: wordpress
+          image: "{{ .Values.wordpress.image.repository }}:{{ .Values.wordpress.image.tag }}"
+          env:
+            - name: WORDPRESS_DATABASE_HOST
+              value: {{ include "wordpress.mysqlFullName" . }}
+            - name: WORDPRESS_DATABASE_NAME
+              value: {{ .Values.mysql.auth.database }}
+            - name: WORDPRESS_DATABASE_USER
+              value: {{ .Values.mysql.auth.username }}
+            - name: WORDPRESS_DATABASE_PASSWORD
+              value: {{ .Values.mysql.auth.password }}
           ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          # livenessProbe:
-          #   {{- toYaml .Values.livenessProbe | nindent 12 }}
-          # readinessProbe:
-          #   {{- toYaml .Values.readinessProbe | nindent 12 }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
+            - containerPort: 80
           volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.volumes }}
+            - name: wordpress-data
+              mountPath: /bitnami/wordpress
       volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        - name: wordpress-data
+          persistentVolumeClaim:
+            claimName: {{ include "wordpress.fullname" . }}-data
+            

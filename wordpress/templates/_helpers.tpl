@@ -1,3 +1,7 @@
+{{- define "wordpress.mysqlFullName" -}}
+{{ include "wordpress.fullname" . }}-mysql
+{{- end -}}
+
 {{/*
 Expand the name of the chart.
 */}}
