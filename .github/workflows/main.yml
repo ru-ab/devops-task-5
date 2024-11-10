@@ -11,6 +11,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Add Bitnami Repo
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+
       - name: Save kubeconfig to file
         run: |
           echo ${{ secrets.KUBECONFIG }} | base64 -d > /tmp/config
